@@ -1,3 +1,2 @@
 web: npm start
 realese: npm run db:migrate
-realese2: npm run db:seed
