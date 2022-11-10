@@ -1,2 +1,2 @@
 web: npm start
-relase: npm run migrate
+relase: npm run db:migrate
