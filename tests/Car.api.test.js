@@ -40,3 +40,10 @@ describe('API get car By ID', () => {
     expect(response.statusCode).toBe(200);
   });
 });
+
+describe('API delete car by ID', () => {
+  it('Unauthorized', async () => {
+    const response = await request(app).delete('/v1/cars/20');
+    expect(response.statusCode).toBe(401);
+  });
+});
