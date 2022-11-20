@@ -7,6 +7,7 @@
     "start": "node -r dotenv/config bin/www",
     "develop": "nodemon -r dotenv/config bin/www",
     "db:create": "sequelize db:create",
+    "db:config": "sequelize db:create && sequelize db:migrate && sequelize db:seed:undo:all && sequelize db:seed:all",
     "db:drop": "sequelize db:drop",
     "db:migrate": "sequelize db:migrate",
     "db:seed": "sequelize db:seed:undo:all && sequelize db:seed:all",
