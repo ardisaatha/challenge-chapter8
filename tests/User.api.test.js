@@ -23,6 +23,14 @@ describe('API Login', () => {
     const response = await request(app).post('/v1/auth/login').send(failedUser);
     expect(response.statusCode).toBe(401);
   });
+  it('failed login : email not registered', async () => {
+    const failedUser = {
+      email: 'apaantuh@gmail.com',
+      password: 'yandaktau',
+    };
+    const response = await request(app).post('/v1/auth/login').send(failedUser);
+    expect(response.statusCode).toBe(404);
+  });
 });
 
 describe('API Register', () => {
