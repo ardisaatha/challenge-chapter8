@@ -1,15 +1,16 @@
 const ApplicationController = require('./ApplicationController');
 const {
-  EmailNotRegisteredError, InsufficientAccessError, RecordNotFoundError, WrongPasswordError,
+  EmailNotRegisteredError,
+  EmailAlreadyTakenError,
+  InsufficientAccessError,
+  RecordNotFoundError,
+  WrongPasswordError,
 } = require('../errors');
 const { JWT_SIGNATURE_KEY } = require('../../config/application');
 
 class AuthenticationController extends ApplicationController {
   constructor({
-    userModel,
-    roleModel,
-    bcrypt,
-    jwt,
+    userModel, roleModel, bcrypt, jwt,
   }) {
     super();
     this.userModel = userModel;
@@ -32,7 +33,6 @@ class AuthenticationController extends ApplicationController {
       if (!!rolename && rolename !== payload.role.name) {
         throw new InsufficientAccessError(payload?.role?.name);
       }
-
       req.user = payload;
       next();
     } catch (err) {
@@ -61,7 +61,10 @@ class AuthenticationController extends ApplicationController {
         return;
       }
 
-      const isPasswordCorrect = this.verifyPassword(password, user.encryptedPassword);
+      const isPasswordCorrect = this.verifyPassword(
+        password,
+        user.encryptedPassword,
+      );
 
       if (!isPasswordCorrect) {
         const err = new WrongPasswordError();
@@ -87,7 +90,6 @@ class AuthenticationController extends ApplicationController {
       const existingUser = await this.userModel.findOne({ where: { email } });
 
       if (existingUser) {
-        // eslint-disable-next-line no-undef
         const err = new EmailAlreadyTakenError(email);
         res.status(422).json(err);
         return;
@@ -134,16 +136,19 @@ class AuthenticationController extends ApplicationController {
     res.status(200).json(user);
   };
 
-  createTokenFromUser = (user, role) => this.jwt.sign({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    image: user.image,
-    role: {
-      id: role.id,
-      name: role.name,
+  createTokenFromUser = (user, role) => this.jwt.sign(
+    {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: {
+        id: role.id,
+        name: role.name,
+      },
     },
-  }, JWT_SIGNATURE_KEY);
+    JWT_SIGNATURE_KEY,
+  );
 
   decodeToken(token) {
     return this.jwt.verify(token, JWT_SIGNATURE_KEY);
@@ -151,9 +156,8 @@ class AuthenticationController extends ApplicationController {
 
   encryptPassword = (password) => this.bcrypt.hashSync(password, 10);
 
-  verifyPassword = (password, encryptedPassword) => {
-    this.bcrypt.compareSync(password, encryptedPassword);
-  };
+  verifyPassword = (password, encryptedPassword) => this
+    .bcrypt.compareSync(password, encryptedPassword);
 }
 
 module.exports = AuthenticationController;
